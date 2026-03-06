@@ -1,6 +1,3 @@
-### Title
-Feature: Report issues directly from the website
-
 ## Summary
 Allow users to raise GitHub issues against the Bunnter application directly from the website, without needing to navigate to the GitHub repository manually.
 
