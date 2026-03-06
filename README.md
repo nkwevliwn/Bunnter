@@ -26,13 +26,38 @@ npm install
 
 # Start development server
 npm run dev
+```
 
-# Build for production
+Open [http://localhost:5173](http://localhost:5173) in your browser.
+
+## Building for Production
+
+```bash
+# Type-check and build for production
 npm run build
+```
 
-# Preview production build
+The build output is written to the **`dist/`** folder. It contains fully static assets (HTML, JS, CSS) that can be served by any web server.
+
+```bash
+# Preview the production build locally
 npm run preview
 ```
+
+After running `npm run preview`, Vite serves the `dist/` folder at [http://localhost:4173](http://localhost:4173) so you can verify the production build before deploying.
+
+## Deployment
+
+The project is deployed automatically to **GitHub Pages** via the CI/CD pipeline in `.github/workflows/ci.yml` whenever a commit is pushed to the `main` branch.
+
+The pipeline:
+1. Installs dependencies (`npm ci`)
+2. Lints the code (`npm run lint`)
+3. Builds the app (`npm run build`) — output goes to `dist/`
+4. Uploads `dist/` as a GitHub Pages artifact
+5. Deploys to GitHub Pages
+
+The live URL is **`https://<your-github-username>.github.io/Bunnter/`** (replace `<your-github-username>` with the repository owner's GitHub username).
 
 ## How It Works
 
