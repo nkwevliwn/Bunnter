@@ -103,6 +103,16 @@ function App() {
           {RABBIT_IMAGES.length - shown.size} remaining
         </p>
         <p className="text-xs mt-1">Swipe right to like · Swipe left to dislike</p>
+        <p className="text-xs mt-2">
+          <a
+            href="https://github.com/nkwevliwn/Bunnter/issues/new?template=bug_report.md"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:opacity-100 transition-opacity"
+          >
+            🐛 Report a problem
+          </a>
+        </p>
       </footer>
     </div>
   );
