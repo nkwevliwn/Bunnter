@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import SwipeCard from './components/SwipeCard';
 import { RABBIT_IMAGES } from './data/images';
 import {
@@ -8,7 +8,42 @@ import {
   type SwipeDirection,
 } from './services/recommendation';
 
+const REPORT_COOLDOWN_MS = 60_000; // 1 minute
+const REPORT_LS_KEY = 'bunnter_report_cooldown';
+
+function getRemainingCooldown(): number {
+  const last = Number(localStorage.getItem(REPORT_LS_KEY) ?? 0);
+  const elapsed = Date.now() - last;
+  return elapsed < REPORT_COOLDOWN_MS
+    ? Math.ceil((REPORT_COOLDOWN_MS - elapsed) / 1000)
+    : 0;
+}
+
 function App() {
+  const [reportCooldown, setReportCooldown] = useState(() =>
+    getRemainingCooldown(),
+  );
+
+  useEffect(() => {
+    if (reportCooldown <= 0) return;
+    const timer = setTimeout(() => setReportCooldown((s) => s - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [reportCooldown]);
+
+  const handleReportClick = useCallback(
+    (e: React.MouseEvent<HTMLAnchorElement>) => {
+      const remaining = getRemainingCooldown();
+      if (remaining > 0) {
+        e.preventDefault();
+        setReportCooldown(remaining);
+        return;
+      }
+      localStorage.setItem(REPORT_LS_KEY, String(Date.now()));
+      setReportCooldown(REPORT_COOLDOWN_MS / 1000);
+    },
+    [],
+  );
+
   const [shown, setShown] = useState<Set<string>>(new Set());
   const [weights, setWeights] = useState<TagWeights>({});
   const [likes, setLikes] = useState(0);
@@ -103,6 +138,23 @@ function App() {
           {RABBIT_IMAGES.length - shown.size} remaining
         </p>
         <p className="text-xs mt-1">Swipe right to like · Swipe left to dislike</p>
+        <p className="text-xs mt-2">
+          {reportCooldown > 0 ? (
+            <span className="opacity-50 cursor-not-allowed">
+              🐛 Report a problem (wait {reportCooldown}s)
+            </span>
+          ) : (
+            <a
+              href="https://github.com/nkwevliwn/Bunnter/issues/new?template=bug_report.md"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:opacity-100 transition-opacity"
+              onClick={handleReportClick}
+            >
+              🐛 Report a problem
+            </a>
+          )}
+        </p>
       </footer>
     </div>
   );
