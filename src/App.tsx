@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import SwipeCard from './components/SwipeCard';
 import { RABBIT_IMAGES } from './data/images';
 import {
@@ -8,6 +8,9 @@ import {
   type SwipeDirection,
 } from './services/recommendation';
 
+const REPORT_COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 hours
+const REPORT_KEY = 'bunnter_last_report';
+
 function App() {
   const [shown, setShown] = useState<Set<string>>(new Set());
   const [weights, setWeights] = useState<TagWeights>({});
@@ -16,6 +19,7 @@ function App() {
   const [current, setCurrent] = useState(() =>
     pickNextImage(RABBIT_IMAGES, new Set(), {}),
   );
+  const [reportBlocked, setReportBlocked] = useState(false);
 
   const handleSwipe = useCallback(
     (direction: SwipeDirection) => {
@@ -35,6 +39,18 @@ function App() {
   );
 
   const handleButton = (direction: SwipeDirection) => handleSwipe(direction);
+
+  const handleReportClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const last = localStorage.getItem(REPORT_KEY);
+    const now = Date.now();
+    const lastTime = last ? parseInt(last, 10) : NaN;
+    if (!isNaN(lastTime) && now - lastTime < REPORT_COOLDOWN_MS) {
+      e.preventDefault();
+      setReportBlocked(true);
+    } else {
+      localStorage.setItem(REPORT_KEY, String(now));
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-between bg-gradient-to-b from-green-50 to-emerald-100 py-6 px-4">
@@ -109,9 +125,15 @@ function App() {
             target="_blank"
             rel="noopener noreferrer"
             className="underline hover:opacity-100 transition-opacity"
+            onClick={handleReportClick}
           >
             🐛 Report a problem
           </a>
+          {reportBlocked && (
+            <span className="block text-red-500 mt-1" role="alert">
+              You've already submitted a report recently. Please wait 24 hours before submitting another.
+            </span>
+          )}
         </p>
       </footer>
     </div>
